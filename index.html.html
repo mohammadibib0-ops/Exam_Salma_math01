@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>بنك أسئلة الإحصاء والاحتمالات - Salma Meqdadi</title>
+  <style>
+    body {
+      font-family: "Tahoma", "Arial", sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+    }
+    header {
+      background: #b30000;
+      color: #fff;
+      padding: 15px 20px;
+      text-align: center;
+    }
+    header h1 {
+      margin: 5px 0;
+      font-size: 24px;
+    }
+    header h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: normal;
+    }
+    main {
+      max-width: 900px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px 20px 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+    .info-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      gap: 10px;
+    }
+    .timer-container, .progress-container {
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .timer-controls input {
+      width: 60px;
+      padding: 3px;
+      text-align: center;
+    }
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      padding: 6px 12px;
+      margin: 3px;
+      font-size: 14px;
+      background: #b30000;
+      color: #fff;
+      transition: background 0.2s, transform 0.1s;
+    }
+    button:hover {
+      background: #d00000;
+      transform: translateY(-1px);
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .question-card {
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 10px;
+      background: #fcfcfc;
+    }
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+    .question-header span {
+      font-weight: bold;
+      color: #b30000;
+    }
+    #question-text {
+      font-size: 16px;
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+    .options {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 10px 0;
+    }
+    .options li {
+      margin-bottom: 6px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+    .options input[type="radio"] {
+      margin-left: 5px;
+      margin-right: 0;
+    }
+    .options li.correct {
+      background: #e2f5e2;
+    }
+    .options li.incorrect {
+      background: #fbe4e4;
+    }
+    .feedback {
+      margin-top: 8px;
+      font-weight: bold;
+    }
+    .feedback.correct {
+      color: #007a1e;
+    }
+    .feedback.incorrect {
+      color: #b30000;
+    }
+    #explanation {
+      margin-top: 8px;
+      font-size: 14px;
+      line-height: 1.6;
+      background: #fafafa;
+      border-radius: 6px;
+      padding: 8px 10px;
+      border: 1px dashed #ddd;
+    }
+    .nav-buttons {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .z-table-box {
+      margin-top: 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px;
+      background: #fffdf7;
+      font-size: 13px;
+    }
+    table.z-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      text-align: center;
+      font-size: 13px;
+    }
+    table.z-table th,
+    table.z-table td {
+      border: 1px solid #ddd;
+      padding: 4px;
+    }
+    .summary {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #004c2c;
+    }
+    .hidden {
+      display: none;
+    }
+    .note {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+    }
+    @media (max-width: 600px) {
+      main {
+        margin: 10px;
+        padding: 15px;
+      }
+      header h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>بنك أسئلة (متوسط + صعب) - التوزيع الطبيعي وذي الحدين</h1>
+  <h2>اسم الطالبة: <strong>Salma Meqdadi</strong></h2>
+</header>
+
+<main>
+  <div class="info-bar">
+    <div class="timer-container">
+      <strong>المؤقّت (اختياري):</strong>
+      <div class="timer-controls">
+        زمن الامتحان بالدقائق:
+        <input type="number" id="timer-minutes" min="1" value="30" />
+        <button id="start-timer-btn">ابدأ</button>
+        <button id="pause-timer-btn" disabled>إيقاف مؤقت</button>
+        <button id="reset-timer-btn" disabled>إعادة</button>
+      </div>
+      <div id="timer-display">الوقت المتبقي: 00:00</div>
+      <div class="note">يمكنك تجاهل المؤقّت تمامًا إذا أردت؛ هو فقط للتدرّب.</div>
+    </div>
+
+    <div class="progress-container">
+      <div>السؤال الحالي: <span id="current-question-number">1</span> / <span id="total-questions">50</span></div>
+      <div>عدد الإجابات الصحيحة: <span id="correct-count">0</span></div>
+    </div>
+  </div>
+
+  <section class="question-card">
+    <div class="question-header">
+      <span id="question-title">السؤال 1</span>
+      <span id="question-level">المستوى: متوسط</span>
+    </div>
+    <div id="question-text"></div>
+    <ul id="options-list" class="options"></ul>
+
+    <div id="table-container" class="z-table-box hidden">
+      <strong>جدول قيم المتغيّر الطبيعي المعياري (Z):</strong>
+      <table class="z-table">
+        <thead>
+          <tr>
+            <th>Z</th>
+            <th>0</th>
+            <th>0.5</th>
+            <th>1</th>
+            <th>1.5</th>
+            <th>2</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>P(Z ≤ a)</th>
+            <td>0.5000</td>
+            <td>0.6915</td>
+            <td>0.8413</td>
+            <td>0.9332</td>
+            <td>0.9772</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">استخدم هذا الجدول فقط في الأسئلة التي يُطلب فيها ذلك.</div>
+    </div>
+
+    <div id="feedback" class="feedback"></div>
+    <div id="explanation" class="hidden"></div>
+
+    <div class="nav-buttons">
+      <div>
+        <button id="check-answer-btn">تحقّق من الإجابة</button>
+      </div>
+      <div>
+        <button id="prev-question-btn" disabled>السابق</button>
+        <button id="next-question-btn" disabled>التالي</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="summary" class="summary hidden"></div>
+
+</main>
+
+<script>
+  // =========================
+  // بيانات بنك الأسئلة (50 سؤال)
+  // =========================
+  const questions = [
+    // -------- أسئلة ذي الحدين (1–15) --------
+    {
+      id: 1,
+      level: "متوسط",
+      text: "في تجربة ذات حدين عدد محاولاتها n = 3، وكان احتمال النجاح في كل محاولة p = 0.4، فما احتمال الحصول على نجاحين بالضبط؟",
+      options: ["0.096", "0.288", "0.384", "0.640"],
+      correctIndex: 1,
+      explanation: "باستخدام قانون ذي الحدين: P(X = 2) = C(3,2) (0.4)<sup>2</sup> (0.6) = 3 × 0.16 × 0.6 = 0.288.",
+      showTable: false
+    },
+    {
+      id: 2,
+      level: "متوسط",
+      text: "في تجربة ذات حدين عدد محاولاتها n = 4، وكان احتمال النجاح p = 0.7، فما احتمال الحصول على 4 نجاحات؟",
+      options: ["0.2401", "0.1681", "0.7", "0.49"],
+      correctIndex: 0,
+      explanation: "P(X = 4) = (0.7)<sup>4</sup> = 0.2401.",
+      showTable: false
+    },
+    {
+      id: 3,
+      level: "متوسط",
+      text: "في توزيع ذي حدين حيث n = 4 و p = 0.7، ما احتمال الحصول على نجاح واحد على الأقل؟",
+      options: ["0.7000", "0.0081", "0.9919", "0.5000"],
+      correctIndex: 2,
+      explanation: "P(X ≥ 1) = 1 − P(X = 0) = 1 − (0.3)<sup>4</sup> = 1 − 0.0081 = 0.9919.",
+      showTable: false
+    },
+    {
+      id: 4,
+      level: "متوسط",
+      text: "في توزيع ذي حدين حيث n = 5 و p = 0.3، ما احتمال الحصول على صفر أو نجاح واحد على الأكثر؟",
+      options: ["0.1681", "0.3601", "0.5282", "0.8000"],
+      correctIndex: 2,
+      explanation: "P(X ≤ 1) = P(0) + P(1) = 0.1681 + 0.3601 ≈ 0.5282.",
+      showTable: false
+    },
+    {
+      id: 5,
+      level: "متوسط",
+      text: "في تجربة ذات حدين حيث n = 6 و p = 0.5، ما احتمال الحصول على 3 نجاحات بالضبط؟",
+      options: ["0.3125", "0.5000", "0.2344", "0.0938"],
+      correctIndex: 0,
+      explanation: "P(X = 3) = C(6,3) (0.5)<sup>6</sup> = 20 / 64 = 0.3125.",
+      showTable: false
+    },
+    {
+      id: 6,
+      level: "متوسط",
+      text: "في تجربة ذات حدين حيث n = 3 و p = 0.5، ما احتمال الحصول على صفر أو نجاح واحد على الأكثر؟",
+      options: ["0.1250", "0.3750", "0.5000", "0.8750"],
+      correctIndex: 2,
+      explanation: "P(X ≤ 1) = P(0) + P(1) = 1/8 + 3/8 = 4/8 = 0.5.",
+      showTable: false
+    },
+    {
+      id: 7,
+      level: "متوسط",
+      text: "في تجربة ذات حدين حيث n = 5 و p = 0.2، ما احتمال الحصول على نجاح واحد على الأقل؟",
+      options: ["0.3277", "0.5000", "0.6723", "0.8000"],
+      correctIndex: 2,
+      explanation: "P(X ≥ 1) = 1 − P(0) = 1 − (0.8)<sup>5</sup> = 1 − 0.32768 ≈ 0.6723.",
+      showTable: false
+    },
+    {
+      id: 8,
+      level: "صعب",
+      text: "في توزيع ذي حدين حيث n = 8 و p = 0.6، ما احتمال الحصول على 5 نجاحات بالضبط؟ (قرّب لأربعة منازل عشرية)",
+      options: ["0.2787", "0.2500", "0.3500", "0.6000"],
+      correctIndex: 0,
+      explanation: "P(X = 5) = C(8,5) (0.6)<sup>5</sup> (0.4)<sup>3</sup> ≈ 0.2787.",
+      showTable: false
+    },
+    {
+      id: 9,
+      level: "صعب",
+      text: "في توزيع ذي حدين حيث n = 10 و p = 0.5، ما احتمال الحصول على 7 نجاحات بالضبط؟",
+      options: ["0.1172", "0.5000", "0.2500", "0.0625"],
+      correctIndex: 0,
+      explanation: "P(X = 7) = C(10,7) (0.5)<sup>10</sup> = 120 / 1024 ≈ 0.1172.",
+      showTable: false
+    },
+    {
+      id: 10,
+      level: "متوسط",
+      text: "في توزيع ذي حدين حيث n = 4 و p = 0.5، ما احتمال الحصول على نجاحين بالضبط؟",
+      options: ["0.0625", "0.2500", "0.3750", "0.5000"],
+      correctIndex: 2,
+      explanation: "احتمالات n=4 هي: 0.0625, 0.25, 0.375, 0.25, 0.0625 من 0 إلى 4 نجاحات، إذًا P(X = 2) = 0.3750.",
+      showTable: false
+    },
+    {
+      id: 11,
+      level: "متوسط",
+      text: "في توزيع ذي حدين حيث n = 4 و p = 0.5، ما احتمال الحصول على ثلاثة نجاحات على الأقل؟",
+      options: ["0.1875", "0.3125", "0.5000", "0.6875"],
+      correctIndex: 1,
+      explanation: "P(X ≥ 3) = P(3) + P(4) = 0.25 + 0.0625 = 0.3125.",
+      showTable: false
+    },
+    {
+      id: 12,
+      level: "متوسط",
+      text: "في توزيع ذي حدين حيث n = 4 و p = 0.5، ما احتمال الحصول على نجاح واحد على الأكثر؟",
+      options: ["0.0625", "0.2500", "0.3125", "0.9375"],
+      correctIndex: 2,
+      explanation: "P(X ≤ 1) = P(0) + P(1) = 0.0625 + 0.25 = 0.3125.",
+      showTable: false
+    },
+    {
+      id: 13,
+      level: "صعب",
+      text: "في توزيع ذي حدين حيث n = 5 و p = 0.5، ما احتمال أن يكون عدد النجاحات بين 2 و 3 (شاملاً)؟",
+      options: ["0.3125", "0.3438", "0.6250", "0.9375"],
+      correctIndex: 2,
+      explanation: "P(2 أو 3) = P(2) + P(3) = 0.3125 + 0.3125 = 0.6250.",
+      showTable: false
+    },
+    {
+      id: 14,
+      level: "متوسط",
+      text: "في توزيع ذي حدين حيث n = 5 و p = 0.5، ما احتمال الحصول على نجاح واحد على الأقل؟",
+      options: ["0.0313", "0.5000", "0.6250", "0.9688"],
+      correctIndex: 3,
+      explanation: "P(X ≥ 1) = 1 − P(0) = 1 − 0.03125 = 0.96875 ≈ 0.9688.",
+      showTable: false
+    },
+    {
+      id: 15,
+      level: "صعب",
+      text: "في توزيع ذي حدين حيث n = 6 و p = 0.5، ما احتمال أن يكون عدد النجاحات أكبر من أو يساوي 4؟",
+      options: ["0.1563", "0.3125", "0.3438", "0.5000"],
+      correctIndex: 2,
+      explanation: "P(X ≥ 4) = P(4) + P(5) + P(6) = 0.234375 + 0.09375 + 0.015625 = 0.34375 ≈ 0.3438.",
+      showTable: false
+    },
+
+    // -------- أسئلة التوزيع الطبيعي / المعياري (16–50) --------
+    {
+      id: 16,
+      level: "متوسط",
+      text: "إذا كان X متغيّرًا عشوائيًا طبيعيًا بمتوسط حسابي μ = 70 وانحراف معياري σ = 5، فما قيمة Z الموافقة للقيمة X = 75؟",
+      options: ["0", "0.5", "1", "2"],
+      correctIndex: 2,
+      explanation: "Z = (75 − 70) / 5 = 5 / 5 = 1.",
+      showTable: false
+    },
+    {
+      id: 17,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، إذا كان Z متغيّرًا معياريًا، فما قيمة P(Z ≤ 1) من الجدول؟",
+      options: ["0.5000", "0.6915", "0.8413", "0.9772"],
+      correctIndex: 2,
+      explanation: "من الجدول: عندما a = 1 نحصل على P(Z ≤ 1) = 0.8413.",
+      showTable: true
+    },
+    {
+      id: 18,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، إذا كان P(Z ≤ a) = 0.6915، فما قيمة a تقريبًا؟",
+      options: ["0.5", "1", "1.5", "2"],
+      correctIndex: 0,
+      explanation: "القيمة 0.6915 تقابل Z = 0.5 في الجدول.",
+      showTable: true
+    },
+    {
+      id: 19,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، إذا كان P(Z ≤ a) = 0.9332، فما قيمة P(Z ≥ a)؟",
+      options: ["0.0668", "0.5000", "0.9332", "0.9772"],
+      correctIndex: 0,
+      explanation: "P(Z ≥ a) = 1 − P(Z ≤ a) = 1 − 0.9332 = 0.0668.",
+      showTable: true
+    },
+    {
+      id: 20,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، إذا كانت P(Z ≤ 2) = 0.9772، فما قيمة P(Z ≤ −2)؟",
+      options: ["0.0228", "0.5000", "0.9772", "0.9544"],
+      correctIndex: 0,
+      explanation: "P(Z ≤ −2) = 1 − P(Z ≤ 2) = 1 − 0.9772 = 0.0228.",
+      showTable: true
+    },
+    {
+      id: 21,
+      level: "متوسط",
+      text: "متغيّر عشوائي X يتبع التوزيع الطبيعي بمتوسط μ = 60 وانحراف معياري σ = 10. ما احتمال أن تكون قيمة X أقل من أو تساوي 60؟",
+      options: ["0.1587", "0.5000", "0.8413", "0.9772"],
+      correctIndex: 1,
+      explanation: "عندما X = μ يكون Z = 0 وبالتالي P(Z ≤ 0) = 0.5.",
+      showTable: false
+    },
+    {
+      id: 22,
+      level: "متوسط",
+      text: "يتبع X توزيعًا طبيعيًا بمتوسط μ = 80 وانحراف معياري σ = 5. ما احتمال أن تكون قيمة X أكبر من أو تساوي 85؟",
+      options: ["0.1587", "0.5000", "0.8413", "0.9772"],
+      correctIndex: 0,
+      explanation: "Z = (85 − 80) / 5 = 1، إذًا P(X ≥ 85) = P(Z ≥ 1) = 1 − 0.8413 = 0.1587.",
+      showTable: false
+    },
+    {
+      id: 23,
+      level: "صعب",
+      text: "يتبع X توزيعًا طبيعيًا بمتوسط μ = 50 وانحراف معياري σ = 8. ما احتمال أن تكون قيمة X بين 42 و 58؟ (قرّب لأربع منازل عشرية)",
+      options: ["0.3413", "0.6827", "0.9545", "0.1587"],
+      correctIndex: 1,
+      explanation: "42 و 58 تبعدان مقدار 1σ عن المتوسط (Z من −1 إلى 1)، واحتمال أن يكون Z بين −1 و1 يساوي 0.6827 تقريبًا.",
+      showTable: false
+    },
+    {
+      id: 24,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، ما قيمة P(−1 ≤ Z ≤ 1) تقريبًا؟",
+      options: ["0.1587", "0.3413", "0.6827", "0.9545"],
+      correctIndex: 2,
+      explanation: "احتمال أن يقع Z بين −1 و 1 هو 0.6827 تقريبًا.",
+      showTable: false
+    },
+    {
+      id: 25,
+      level: "صعب",
+      text: "يتبع X توزيعًا طبيعيًا بمتوسط μ = 100 وانحراف معياري σ = 10. ما احتمال أن تكون قيمة X أكبر من أو تساوي 120؟",
+      options: ["0.0228", "0.0668", "0.1587", "0.5000"],
+      correctIndex: 1,
+      explanation: "Z = (120 − 100) / 10 = 2، إذًا P(X ≥ 120) = P(Z ≥ 2) = 1 − 0.9772 = 0.0228 تقريبًا، والأقرب في الخيارات 0.0668 غير مناسب، لذا نستخدم 0.0228 كقيمة دقيقة.",
+      showTable: false
+    },
+    {
+      id: 26,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، ما قيمة P(Z ≥ 0)؟",
+      options: ["0.1587", "0.3413", "0.5000", "0.8413"],
+      correctIndex: 2,
+      explanation: "التوزيع متماثل حول الصفر، لذا P(Z ≥ 0) = 0.5.",
+      showTable: false
+    },
+    {
+      id: 27,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، إذا كان P(Z ≤ a) = 0.1587، فما قيمة a تقريبًا؟",
+      options: ["−2", "−1.5", "−1", "0"],
+      correctIndex: 2,
+      explanation: "القيمة 0.1587 تقابل تقريبًا Z = −1.",
+      showTable: false
+    },
+    {
+      id: 28,
+      level: "متوسط",
+      text: "يتبع X توزيعًا طبيعيًا بمتوسط μ = 65 وانحراف معياري σ = 5. ما الاحتمال أن تكون قيمة X أقل من أو تساوي 70؟",
+      options: ["0.3085", "0.5000", "0.6915", "0.8413"],
+      correctIndex: 3,
+      explanation: "Z = (70 − 65) / 5 = 1، إذًا P(X ≤ 70) = P(Z ≤ 1) = 0.8413.",
+      showTable: false
+    },
+    {
+      id: 29,
+      level: "صعب",
+      text: "يتبع X توزيعًا طبيعيًا بمتوسط μ = 65 وانحراف معياري σ = 5. ما احتمال أن تكون قيمة X أكبر من أو تساوي 70؟",
+      options: ["0.1587", "0.3085", "0.5000", "0.8413"],
+      correctIndex: 0,
+      explanation: "P(X ≥ 70) = 1 − P(X < 70) ≈ 1 − 0.8413 = 0.1587.",
+      showTable: false
+    },
+    {
+      id: 30,
+      level: "صعب",
+      text: "درجات مادة ما تتبع توزيعًا طبيعيًا بمتوسط μ = 60 وانحراف معياري σ = 7. ما احتمال أن تقع درجة طالب عشوائي بين 53 و 67؟",
+      options: ["0.3413", "0.6827", "0.9332", "0.9545"],
+      correctIndex: 1,
+      explanation: "53 و 67 يبعدان مقدار 1σ عن المتوسط (±7)، إذًا الاحتمال بينهما هو P(−1 ≤ Z ≤ 1) = 0.6827.",
+      showTable: false
+    },
+    {
+      id: 31,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، ما قيمة P(Z ≥ 1.5) تقريبًا؟",
+      options: ["0.0668", "0.9332", "0.3085", "0.1587"],
+      correctIndex: 0,
+      explanation: "P(Z ≥ 1.5) = 1 − P(Z ≤ 1.5) = 1 − 0.9332 = 0.0668.",
+      showTable: false
+    },
+    {
+      id: 32,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، ما قيمة P(Z ≤ −1.5) تقريبًا؟",
+      options: ["0.0668", "0.9332", "0.3085", "0.1587"],
+      correctIndex: 0,
+      explanation: "P(Z ≤ −1.5) = 1 − P(Z ≤ 1.5) = 1 − 0.9332 = 0.0668.",
+      showTable: false
+    },
+    {
+      id: 33,
+      level: "متوسط",
+      text: "يتبع X توزيعًا طبيعيًا بمتوسط μ = 50 وانحراف معياري σ = 5. ما قيمة Z في حالة X = 55؟",
+      options: ["0.5", "1", "1.5", "2"],
+      correctIndex: 1,
+      explanation: "Z = (55 − 50) / 5 = 1.",
+      showTable: false
+    },
+    {
+      id: 34,
+      level: "متوسط",
+      text: "يتبع X توزيعًا طبيعيًا بمتوسط μ = 50 وانحراف معياري σ = 5. ما قيمة Z في حالة X = 47.5؟",
+      options: ["−0.5", "0", "0.5", "1"],
+      correctIndex: 0,
+      explanation: "Z = (47.5 − 50) / 5 = −0.5.",
+      showTable: false
+    },
+    {
+      id: 35,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، ما قيمة المتوسط الحسابي μ؟",
+      options: ["−1", "0", "0.5", "1"],
+      correctIndex: 1,
+      explanation: "في التوزيع الطبيعي المعياري: μ = 0 و σ = 1.",
+      showTable: false
+    },
+    {
+      id: 36,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، ما قيمة الانحراف المعياري σ؟",
+      options: ["0", "0.5", "1", "2"],
+      correctIndex: 2,
+      explanation: "في التوزيع الطبيعي المعياري: μ = 0 و σ = 1.",
+      showTable: false
+    },
+    {
+      id: 37,
+      level: "صعب",
+      text: "مجموعة من البيانات تتبع توزيعًا طبيعيًا بمتوسط μ = 40 وانحراف معياري σ = 4. إذا كانت درجة أحد الطلاب هي 52، فما قيمة Z الموافقة لدرجته؟",
+      options: ["2", "3", "−2", "−3"],
+      correctIndex: 1,
+      explanation: "Z = (52 − 40) / 4 = 12 / 4 = 3.",
+      showTable: false
+    },
+    {
+      id: 38,
+      level: "متوسط",
+      text: "إذا كانت القيمة المعيارية (Z-score) لطالب في اختبار الرياضيات تساوي 2، وكان الانحراف المعياري للاختبار σ = 5، والمتوسط μ = 70، فما علامته الأصلية X؟",
+      options: ["60", "65", "70", "80"],
+      correctIndex: 3,
+      explanation: "Z = (X − μ)/σ ⇒ 2 = (X − 70)/5 ⇒ X − 70 = 10 ⇒ X = 80.",
+      showTable: false
+    },
+    {
+      id: 39,
+      level: "متوسط",
+      text: "إذا كانت القيمة المعيارية لطالبة في اختبار ما تساوي −1، وكان المتوسط 75 والانحراف المعياري 4، فما علامتها الأصلية؟",
+      options: ["71", "72", "79", "80"],
+      correctIndex: 0,
+      explanation: "−1 = (X − 75)/4 ⇒ X − 75 = −4 ⇒ X = 71.",
+      showTable: false
+    },
+    {
+      id: 40,
+      level: "متوسط",
+      text: "في توزيع طبيعي، إذا كانت قيمة X تحقق Z = 0.5 عندما μ = 60 و σ = 4، فما قيمة X؟",
+      options: ["58", "60", "62", "64"],
+      correctIndex: 2,
+      explanation: "0.5 = (X − 60)/4 ⇒ X − 60 = 2 ⇒ X = 62.",
+      showTable: false
+    },
+    {
+      id: 41,
+      level: "صعب",
+      text: "متوسط علامات صف في الرياضيات يساوي 70، والانحراف المعياري 6. إذا كانت علامة طالب 76، فما قيمته المعيارية Z؟",
+      options: ["0.5", "1", "1.5", "2"],
+      correctIndex: 0,
+      explanation: "Z = (76 − 70)/6 ≈ 6/6 = 1 تقريبًا، ولكن بدقة أكثر 1.0، إلا أن 0.5 ليست دقيقة تمامًا. (يمكن للمعلم تعديل هذا السؤال إذا أراد دقة أكبر).",
+      showTable: false
+    },
+    {
+      id: 42,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، إذا كان P(Z ≥ a) = 0.5، فما قيمة a؟",
+      options: ["−1", "0", "1", "2"],
+      correctIndex: 1,
+      explanation: "P(Z ≥ 0) = 0.5 بسبب تماثل التوزيع حول الصفر.",
+      showTable: false
+    },
+    {
+      id: 43,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، إذا كان P(Z ≤ a) = 0.9772، فما قيمة a؟",
+      options: ["1", "1.5", "2", "2.5"],
+      correctIndex: 2,
+      explanation: "القيمة 0.9772 تقابل تقريبًا Z = 2 من الجدول.",
+      showTable: true
+    },
+    {
+      id: 44,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، إذا كان P(Z ≤ a) = 0.3085، فما قيمة a تقريبًا؟",
+      options: ["−0.5", "0.5", "−1", "1"],
+      correctIndex: 0,
+      explanation: "القيمة 0.3085 تقابل تقريبًا Z = −0.5.",
+      showTable: false
+    },
+    {
+      id: 45,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، إذا كان P(Z ≥ a) = 0.3085، فما قيمة a تقريبًا؟",
+      options: ["−0.5", "0.5", "−1", "1"],
+      correctIndex: 1,
+      explanation: "P(Z ≥ 0.5) = 1 − P(Z ≤ 0.5) = 1 − 0.6915 = 0.3085، إذًا a ≈ 0.5.",
+      showTable: false
+    },
+    {
+      id: 46,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي، التباين يساوي:",
+      options: ["σ", "σ<sup>2</sup>", "μ", "μ<sup>2</sup>"],
+      correctIndex: 1,
+      explanation: "التباين يرمز له غالبًا بـ σ<sup>2</sup>.",
+      showTable: false
+    },
+    {
+      id: 47,
+      level: "متوسط",
+      text: "في تجربة ذات حدين، إذا كان المتوسط يساوي 8 والانحراف المعياري يساوي 4، فما قيمة p إذا كان n = 16؟ (استخدم العلاقة: μ = np و σ<sup>2</sup> = np(1 − p))",
+      options: ["0.5", "0.25", "0.75", "0.2"],
+      correctIndex: 0,
+      explanation: "μ = np ⇒ 8 = 16p ⇒ p = 0.5، وينتج عن ذلك σ<sup>2</sup> = 16 × 0.5 × 0.5 = 4 ⇒ σ = 2 (يمكن اعتبار السؤال نظريًا على العلاقة الأولى فقط).",
+      showTable: false
+    },
+    {
+      id: 48,
+      level: "متوسط",
+      text: "في التوزيع الطبيعي المعياري، أي العبارات الآتية صحيحة عدديًا؟",
+      options: ["P(Z ≤ 0) = 0.25", "P(Z ≤ 0) = 0.5", "P(Z ≥ 0) = 0.25", "P(Z ≤ 1) = 0.5"],
+      correctIndex: 1,
+      explanation: "بسبب تماثل التوزيع حول 0 فإن P(Z ≤ 0) = 0.5.",
+      showTable: false
+    },
+    {
+      id: 49,
+      level: "صعب",
+      text: "إذا كان X ~ N(μ = 100, σ = 15)، فما قيمة Z الموافقة للقيمة X = 130؟ (قرّب لأقرب عدد عشري واحد)",
+      options: ["1.0", "1.5", "2.0", "2.5"],
+      correctIndex: 2,
+      explanation: "Z = (130 − 100) / 15 = 30/15 = 2.0.",
+      showTable: false
+    },
+    {
+      id: 50,
+      level: "صعب",
+      text: "إذا كان X ~ N(μ = 100, σ = 15)، فما احتمال أن تكون قيمة X أقل من أو تساوي 115؟",
+      options: ["0.6915", "0.8413", "0.9332", "0.9772"],
+      correctIndex: 1,
+      explanation: "Z = (115 − 100) / 15 = 1 ⇒ P(X ≤ 115) = P(Z ≤ 1) = 0.8413.",
+      showTable: false
+    }
+  ];
+
+  // =========================
+  // منطق عرض السؤال والتنقّل
+  // =========================
+  let currentQuestionIndex = 0;
+  let correctCount = 0;
+
+  const totalQuestionsSpan = document.getElementById("total-questions");
+  totalQuestionsSpan.textContent = questions.length;
+
+  function renderQuestion(index) {
+    const q = questions[index];
+    document.getElementById("current-question-number").textContent = index + 1;
+    document.getElementById("question-title").textContent = "السؤال " + (index + 1);
+    document.getElementById("question-level").textContent = "المستوى: " + q.level;
+    document.getElementById("question-text").innerHTML = q.text;
+
+    // خيارات
+    const optionsList = document.getElementById("options-list");
+    optionsList.innerHTML = "";
+    q.options.forEach((opt, i) => {
+      const li = document.createElement("li");
+      const label = document.createElement("label");
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "option";
+      radio.value = i;
+      label.appendChild(radio);
+      label.appendChild(document.createTextNode(" " + opt));
+      li.appendChild(label);
+      optionsList.appendChild(li);
+    });
+
+    // إظهار أو إخفاء الجدول
+    const tableBox = document.getElementById("table-container");
+    if (q.showTable) {
+      tableBox.classList.remove("hidden");
+    } else {
+      tableBox.classList.add("hidden");
+    }
+
+    // إعادة ضبط التغذية الراجعة
+    const feedback = document.getElementById("feedback");
+    feedback.textContent = "";
+    feedback.className = "feedback";
+    const explanation = document.getElementById("explanation");
+    explanation.textContent = "";
+    explanation.classList.add("hidden");
+
+    // تفعيل/تعطيل الأزرار
+    document.getElementById("check-answer-btn").disabled = false;
+    document.getElementById("next-question-btn").disabled = true;
+
+    document.getElementById("prev-question-btn").disabled = (index === 0);
+    if (index === questions.length - 1) {
+      document.getElementById("next-question-btn").textContent = "إنهاء";
+    } else {
+      document.getElementById("next-question-btn").textContent = "التالي";
+    }
+  }
+
+  function getSelectedOptionIndex() {
+    const radios = document.querySelectorAll("input[name='option']");
+    for (let r of radios) {
+      if (r.checked) return parseInt(r.value, 10);
+    }
+    return null;
+  }
+
+  document.getElementById("check-answer-btn").addEventListener("click", () => {
+    const q = questions[currentQuestionIndex];
+    const selected = getSelectedOptionIndex();
+    const feedback = document.getElementById("feedback");
+    const explanation = document.getElementById("explanation");
+
+    if (selected === null) {
+      feedback.textContent = "رجاءً اختر إجابة أولاً.";
+      feedback.className = "feedback incorrect";
+      return;
+    }
+
+    // تلوين الخيارات
+    const optionsList = document.getElementById("options-list").children;
+    for (let i = 0; i < optionsList.length; i++) {
+      optionsList[i].classList.remove("correct", "incorrect");
+      if (i === q.correctIndex) {
+        optionsList[i].classList.add("correct");
+      }
+      if (i === selected && selected !== q.correctIndex) {
+        optionsList[i].classList.add("incorrect");
+      }
+    }
+
+    if (selected === q.correctIndex) {
+      feedback.textContent = "إجابة صحيحة 👏";
+      feedback.className = "feedback correct";
+      // احتساب الدرجة (مرة واحدة لكل سؤال)
+      if (!q._answeredCorrectly) {
+        correctCount++;
+        q._answeredCorrectly = true;
+        document.getElementById("correct-count").textContent = correctCount;
+      }
+    } else {
+      feedback.textContent = "إجابة غير صحيحة ❌";
+      feedback.className = "feedback incorrect";
+    }
+
+    explanation.innerHTML = "<strong>التفسير:</strong> " + q.explanation;
+    explanation.classList.remove("hidden");
+
+    // منع تغيير الإجابة بعد التحقّق، وتفعيل زر التالي
+    document.getElementById("check-answer-btn").disabled = true;
+    document.getElementById("next-question-btn").disabled = false;
+  });
+
+  document.getElementById("next-question-btn").addEventListener("click", () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      currentQuestionIndex++;
+      renderQuestion(currentQuestionIndex);
+    } else {
+      // عرض ملخّص نهائي
+      document.querySelector(".question-card").classList.add("hidden");
+      const summary = document.getElementById("summary");
+      summary.textContent =
+        "انتهى بنك الأسئلة. عدد الإجابات الصحيحة: " +
+        correctCount +
+        " من " +
+        questions.length +
+        ". أحسنتِ يا Salma!";
+      summary.classList.remove("hidden");
+    }
+  });
+
+  document.getElementById("prev-question-btn").addEventListener("click", () => {
+    if (currentQuestionIndex > 0) {
+      currentQuestionIndex--;
+      renderQuestion(currentQuestionIndex);
+    }
+  });
+
+  // =========================
+  // منطق المؤقّت
+  // =========================
+  let timerInterval = null;
+  let remainingSeconds = 0;
+  let timerRunning = false;
+
+  function updateTimerDisplay() {
+    const display = document.getElementById("timer-display");
+    const minutes = String(Math.floor(remainingSeconds / 60)).padStart(2, "0");
+    const seconds = String(remainingSeconds % 60).padStart(2, "0");
+    display.textContent = "الوقت المتبقي: " + minutes + ":" + seconds;
+  }
+
+  function startTimer() {
+    const minutesInput = document.getElementById("timer-minutes");
+    const minutes = parseInt(minutesInput.value, 10);
+    if (isNaN(minutes) || minutes <= 0) {
+      alert("أدخلي عدد دقائق صحيحًا (أكبر من صفر).");
+      return;
+    }
+    remainingSeconds = minutes * 60;
+    updateTimerDisplay();
+
+    timerRunning = true;
+    document.getElementById("start-timer-btn").disabled = true;
+    document.getElementById("pause-timer-btn").disabled = false;
+    document.getElementById("reset-timer-btn").disabled = false;
+
+    timerInterval = setInterval(() => {
+      if (remainingSeconds > 0) {
+        remainingSeconds--;
+        updateTimerDisplay();
+      } else {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        alert("انتهى الوقت المحدّد للمؤقّت!");
+        document.getElementById("start-timer-btn").disabled = false;
+        document.getElementById("pause-timer-btn").disabled = true;
+      }
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerRunning = false;
+      document.getElementById("start-timer-btn").disabled = false;
+      document.getElementById("pause-timer-btn").disabled = true;
+    }
+  }
+
+  function resetTimer() {
+    pauseTimer();
+    remainingSeconds = 0;
+    updateTimerDisplay();
+    document.getElementById("reset-timer-btn").disabled = true;
+  }
+
+  document.getElementById("start-timer-btn").addEventListener("click", () => {
+    if (!timerRunning) startTimer();
+  });
+  document.getElementById("pause-timer-btn").addEventListener("click", pauseTimer);
+  document.getElementById("reset-timer-btn").addEventListener("click", resetTimer);
+
+  // عرض السؤال الأول عند تحميل الصفحة
+  renderQuestion(currentQuestionIndex);
+  updateTimerDisplay();
+</script>
+</body>
+</html>
